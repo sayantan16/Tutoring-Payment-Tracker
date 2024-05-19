@@ -1,0 +1,18 @@
+/* static/style.css */
+
+/* Change the color of the file input text */
+.custom-file-input ~ .custom-file-label::after {
+  content: "Browse";
+  color: white;
+}
+
+.custom-file-label {
+  color: white;
+  background-color: #343a40; /* Dark background for better contrast */
+  border: 1px solid #ced4da;
+}
+
+.custom-file-input:focus ~ .custom-file-label {
+  box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+  background-color: #343a40; /* Dark background on focus */
+}

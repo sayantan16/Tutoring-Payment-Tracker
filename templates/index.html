@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tutoring Payment Tracker</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar navbar-dark bg-dark">
+      <a class="navbar-brand" href="#">Tutoring Payment Tracker</a>
+      <form
+        class="form-inline"
+        id="uploadForm"
+        method="post"
+        enctype="multipart/form-data"
+      >
+        <div class="custom-file mx-sm-3 mb-2">
+          <input
+            type="file"
+            class="custom-file-input"
+            id="file"
+            name="file"
+            multiple
+            required
+          />
+          <label class="custom-file-label" for="file">Choose files</label>
+        </div>
+        <div class="form-group mx-sm-3 mb-2">
+          <select class="form-control" name="view" id="viewSelect" required>
+            <option value="" disabled selected>Select view</option>
+            <option value="payments">Payment List</option>
+            <option value="unpaid">Unpaid Students</option>
+          </select>
+        </div>
+        <div
+          class="form-group mx-sm-3 mb-2"
+          id="month-select"
+          style="display: none"
+        >
+          <select class="form-control" name="month" id="monthSelect">
+            <option value="" disabled selected>Select month</option>
+            <option value="01">January</option>
+            <option value="02">February</option>
+            <option value="03">March</option>
+            <option value="04">April</option>
+            <option value="05">May</option>
+            <option value="06">June</option>
+            <option value="07">July</option>
+            <option value="08">August</option>
+            <option value="09">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Upload</button>
+      </form>
+    </nav>
+
+    <div class="container mt-5">
+      <h1>Welcome to the Tutoring Payment Tracker</h1>
+      <p>
+        Upload PDF files and choose a view to see the payment list or the list
+        of unpaid students for a specific month.
+      </p>
+    </div>
+
+    <div
+      class="spinner-border text-primary"
+      role="status"
+      id="loadingSpinner"
+      style="display: none"
+    >
+      <span class="sr-only">Loading...</span>
+    </div>
+
+    <script>
+      document
+        .querySelector('select[name="view"]')
+        .addEventListener('change', function () {
+          var monthSelect = document.getElementById('month-select');
+          if (this.value === 'unpaid') {
+            monthSelect.style.display = 'block';
+          } else {
+            monthSelect.style.display = 'none';
+          }
+        });
+
+      // Show the selected file names
+      document
+        .querySelector('.custom-file-input')
+        .addEventListener('change', function (e) {
+          var fileNames = Array.from(e.target.files)
+            .map((file) => file.name)
+            .join(', ');
+          var nextSibling = e.target.nextElementSibling;
+          nextSibling.innerText = fileNames;
+        });
+
+      // Form validation
+      document
+        .getElementById('uploadForm')
+        .addEventListener('submit', function (e) {
+          var fileInput = document.getElementById('file');
+          var viewSelect = document.getElementById('viewSelect');
+          var monthSelect = document.getElementById('monthSelect');
+
+          if (!fileInput.files.length) {
+            alert('Please choose at least one file.');
+            e.preventDefault();
+            return;
+          }
+
+          if (!viewSelect.value) {
+            alert('Please select a view mode.');
+            e.preventDefault();
+            return;
+          }
+
+          if (viewSelect.value === 'unpaid' && !monthSelect.value) {
+            alert('Please select a month.');
+            e.preventDefault();
+            return;
+          }
+
+          // Show loading spinner
+          document.getElementById('loadingSpinner').style.display = 'block';
+        });
+    </script>
+  </body>
+</html>

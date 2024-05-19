@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Unpaid Students</title>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <h1>Unpaid Students for Month {{ month }}</h1>
+      <div
+        class="spinner-border text-primary"
+        role="status"
+        id="loadingSpinner"
+        style="display: none"
+      >
+        <span class="sr-only">Loading...</span>
+      </div>
+      {% if unpaid_students %}
+      <ul class="list-group">
+        {% for student in unpaid_students %}
+        <li class="list-group-item">{{ student }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p>All students have paid for this month.</p>
+      {% endif %}
+      <a href="/" class="btn btn-primary mt-3">Upload another file</a>
+    </div>
+
+    <script>
+      window.onload = function () {
+        document.getElementById('loadingSpinner').style.display = 'none';
+      };
+    </script>
+  </body>
+</html>
