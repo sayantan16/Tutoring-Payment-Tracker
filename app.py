@@ -1,18 +1,29 @@
-# app.py
+import os
 from flask import Flask, request, redirect, url_for, render_template, flash
 from flask_cors import CORS
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from werkzeug.utils import secure_filename
-import os
+import ssl
+import re
+import calendar
+
 from pdf_to_xml import pdf_to_xml
-from xml_parser import parse_xml_to_csv, merge_csv_files
+from xml_parser import merge_csv_files, parse_xml_to_csv  
+
+# Create an unverified context to handle SSL issues with SendGrid
+ssl._create_default_https_context = ssl._create_unverified_context
 
 app = Flask(__name__)
-CORS(app)  # Add this line to enable CORS
+CORS(app)
 
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['NAMES_FILE'] = 'names_list.txt'
 app.secret_key = 'supersecretkey'
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+def get_month_name(month_number):
+    return calendar.month_name[int(month_number)]
 
 def read_names_list():
     if not os.path.exists(app.config['NAMES_FILE']):
@@ -117,7 +128,8 @@ def upload_file():
             if unpaid_students is None:
                 flash('The selected month is not present in the file.', 'error')
                 return redirect(request.url)
-            return render_template('unpaid_students.html', unpaid_students=unpaid_students, month=month)
+            month_name = get_month_name(month)
+            return render_template('unpaid_students.html', unpaid_students=unpaid_students, month=month_name)
     return render_template('index.html')
 
 def extract_names_from_csv(csv_path):
@@ -159,6 +171,45 @@ def show_csv():
         '09': 'September', '10': 'October', '11': 'November', '12': 'December'
     }
     return render_template('show_csv.html', data_by_month=data_by_month, month_names=month_names)
+
+@app.route('/send_email', methods=['POST'])
+def send_email():
+    recipient = request.form['email']
+    month_name = request.form['month']
+    
+    # Validate the email address
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", recipient):
+        return {"message": "Invalid email address.", "status": "error"}, 400
+
+    unpaid_students = request.form.getlist('unpaid_students')
+
+    if unpaid_students:
+        unpaid_list = "\n".join(unpaid_students)
+        html_content = (
+            "<strong>The following students have not paid for " + month_name + ":</strong><br><br>" +
+            unpaid_list.replace('\n', '<br>')
+        )
+        message = Mail(
+            from_email='sayantankundu93@gmail.com',
+            to_emails=recipient,
+            subject=f"Unpaid Students for {month_name}",
+            html_content=html_content
+        )
+        try:
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            response = sg.send(message)
+            print(response.status_code)
+            print(response.body)
+            print(response.headers)
+            if response.status_code == 202:
+                return {"message": f"Email sent to {recipient}", "status": "success"}, 200
+            else:
+                return {"message": "Failed to send email.", "status": "error"}, response.status_code
+        except Exception as e:
+            print(e)
+            return {"message": f"Failed to send email: {str(e)}", "status": "error"}, 500
+    else:
+        return {"message": "All students have paid for this month.", "status": "info"}, 200
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)

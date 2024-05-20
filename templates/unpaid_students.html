@@ -8,10 +8,12 @@
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
     />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
   </head>
   <body>
     <div class="container mt-5">
-      <h1>Unpaid Students for Month {{ month }}</h1>
+      <h1>Unpaid Students for {{ month }}</h1>
       <div
         class="spinner-border text-primary"
         role="status"
@@ -26,6 +28,27 @@
         <li class="list-group-item">{{ student }}</li>
         {% endfor %}
       </ul>
+      <form
+        action="{{ url_for('send_email') }}"
+        method="post"
+        class="form-inline mt-3"
+        id="emailForm"
+      >
+        <input type="hidden" name="month" value="{{ month }}" />
+        {% for student in unpaid_students %}
+        <input type="hidden" name="unpaid_students" value="{{ student }}" />
+        {% endfor %}
+        <div class="form-group mx-sm-3 mb-2">
+          <input
+            type="email"
+            class="form-control"
+            name="email"
+            placeholder="Recipient Email"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Email List</button>
+      </form>
       {% else %}
       <p>All students have paid for this month.</p>
       {% endif %}
@@ -33,9 +56,57 @@
     </div>
 
     <script>
-      window.onload = function () {
-        document.getElementById('loadingSpinner').style.display = 'none';
-      };
+      document
+        .getElementById('emailForm')
+        .addEventListener('submit', function (e) {
+          e.preventDefault(); // Prevent form from submitting normally
+          var form = e.target;
+
+          // Validate email address
+          var email = form.email.value;
+          var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailPattern.test(email)) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Invalid Email',
+              text: 'Please enter a valid email address.',
+            });
+            return;
+          }
+
+          // Show loading spinner
+          document.getElementById('loadingSpinner').style.display = 'block';
+
+          // Submit the form via AJAX
+          $.ajax({
+            type: 'POST',
+            url: form.action,
+            data: $(form).serialize(),
+            success: function (response) {
+              Swal.fire({
+                icon: response.status,
+                title: response.status === 'success' ? 'Email Sent' : 'Notice',
+                text: response.message,
+              }).then(function () {
+                document.getElementById('loadingSpinner').style.display =
+                  'none';
+              });
+            },
+            error: function (response) {
+              var message = response.responseJSON
+                ? response.responseJSON.message
+                : 'Failed to send email. Please try again later.';
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+              }).then(function () {
+                document.getElementById('loadingSpinner').style.display =
+                  'none';
+              });
+            },
+          });
+        });
     </script>
   </body>
 </html>
