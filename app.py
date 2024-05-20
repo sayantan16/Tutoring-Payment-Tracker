@@ -1,11 +1,14 @@
 # app.py
 from flask import Flask, request, redirect, url_for, render_template, flash
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 from pdf_to_xml import pdf_to_xml
 from xml_parser import parse_xml_to_csv, merge_csv_files
 
 app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS
+
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['NAMES_FILE'] = 'names_list.txt'
 app.secret_key = 'supersecretkey'
@@ -158,4 +161,4 @@ def show_csv():
     return render_template('show_csv.html', data_by_month=data_by_month, month_names=month_names)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=8080)

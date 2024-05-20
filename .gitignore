@@ -56,6 +56,7 @@ ipython_config.py
 # VS Code
 .vscode/
 *.code-workspace
+nohup.out
 
 # Flask files
 instance/
