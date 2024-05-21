@@ -196,11 +196,19 @@ def send_email():
             html_content=html_content
         )
         try:
-            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            sendgrid_api_key = os.environ.get('SENDGRID_API_KEY')
+            if not sendgrid_api_key:
+                print("SendGrid API key is not set")
+                return {"message": "SendGrid API key is not set.", "status": "error"}, 500
+            
+            print(f"Using SendGrid API key: {sendgrid_api_key}")  # Debugging information
+            sg = SendGridAPIClient(sendgrid_api_key)
             response = sg.send(message)
-            print(response.status_code)
-            print(response.body)
-            print(response.headers)
+            
+            print("SendGrid Response Status Code:", response.status_code)
+            print("SendGrid Response Body:", response.body)
+            print("SendGrid Response Headers:", response.headers)
+            
             if response.status_code == 202:
                 return {"message": f"Email sent to {recipient}", "status": "success"}, 200
             else:
@@ -212,4 +220,4 @@ def send_email():
         return {"message": "All students have paid for this month.", "status": "info"}, 200
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    app.run(debug=True, port=8888)

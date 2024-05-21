@@ -22,23 +22,6 @@ install_python_windows() {
     choco install python -y
 }
 
-# Function to install ngrok
-install_ngrok() {
-    echo "Installing ngrok..."
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS
-        brew install --cask ngrok
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux
-        wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz -O ngrok.tgz
-        tar xvzf ngrok.tgz
-        sudo mv ngrok /usr/local/bin
-    elif [[ "$OSTYPE" == "msys" ]]; then
-        # Windows
-        choco install ngrok -y
-    fi
-}
-
 # Check if Python is installed and install if not present
 if ! command -v python3 &> /dev/null; then
     echo "Python3 is not installed. Installing Python3..."
@@ -80,16 +63,16 @@ else
     exit 1
 fi
 
-# Check if ngrok is installed and install if not present
-if ! command -v ngrok &> /dev/null; then
-    echo "ngrok is not installed. Installing ngrok..."
-    install_ngrok
+# Source environment variables from sendgrid.env
+if [ -f "sendgrid.env" ]; then
+    echo "Sourcing environment variables from sendgrid.env..."
+    source sendgrid.env
+    export $(grep -v '^#' sendgrid.env | xargs)
+else
+    echo "sendgrid.env file not found. Please provide the environment variable file."
+    exit 1
 fi
 
-# Run the Flask application in the background on port 8080
-echo "Running the Flask application on port 8080..."
-nohup python app.py --port 8080 &
-
-# Run ngrok on port 8080
-echo "Running ngrok on port 8080..."
-ngrok http 8080
+# Run the Flask application
+echo "Running the Flask application on port 8888..."
+python app.py --port 8888
