@@ -10,49 +10,96 @@
     />
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <style>
+      .container {
+        margin-top: 20px;
+      }
+      .spinner-border {
+        display: none;
+        margin: 0 auto;
+      }
+    </style>
   </head>
   <body>
-    <div class="container mt-5">
-      <h1>Unpaid Students for {{ month }}</h1>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/">Tutoring Payment Tracker</a>
+    </nav>
+
+    <div class="container">
+      <h2>Unpaid Students for {{ month }}</h2>
       <div
         class="spinner-border text-primary"
         role="status"
         id="loadingSpinner"
-        style="display: none"
       >
         <span class="sr-only">Loading...</span>
       </div>
       {% if unpaid_students %}
-      <ul class="list-group">
+      <ul class="list-group mt-3">
         {% for student in unpaid_students %}
         <li class="list-group-item">{{ student }}</li>
         {% endfor %}
       </ul>
-      <form
-        action="{{ url_for('send_email') }}"
-        method="post"
-        class="form-inline mt-3"
-        id="emailForm"
+      <button
+        class="btn btn-primary mt-3"
+        data-toggle="modal"
+        data-target="#emailModal"
       >
-        <input type="hidden" name="month" value="{{ month }}" />
-        {% for student in unpaid_students %}
-        <input type="hidden" name="unpaid_students" value="{{ student }}" />
-        {% endfor %}
-        <div class="form-group mx-sm-3 mb-2">
-          <input
-            type="email"
-            class="form-control"
-            name="email"
-            placeholder="Recipient Email"
-            required
-          />
-        </div>
-        <button type="submit" class="btn btn-primary mb-2">Email List</button>
-      </form>
+        Email List
+      </button>
       {% else %}
       <p>All students have paid for this month.</p>
       {% endif %}
       <a href="/" class="btn btn-primary mt-3">Upload another file</a>
+    </div>
+
+    <!-- Email Modal -->
+    <div
+      class="modal fade"
+      id="emailModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="emailModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="emailModalLabel">Send Email</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="emailForm" action="/send_email" method="post">
+              <input type="hidden" name="month" value="{{ month }}" />
+              {% for student in unpaid_students %}
+              <input
+                type="hidden"
+                name="unpaid_students"
+                value="{{ student }}"
+              />
+              {% endfor %}
+              <div class="form-group">
+                <label for="email">Recipient Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  name="email"
+                  placeholder="Recipient Email"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-primary">Send Email</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script>
@@ -83,6 +130,7 @@
             url: form.action,
             data: $(form).serialize(),
             success: function (response) {
+              console.log(response); // Debugging information
               Swal.fire({
                 icon: response.status,
                 title: response.status === 'success' ? 'Email Sent' : 'Notice',
@@ -90,9 +138,11 @@
               }).then(function () {
                 document.getElementById('loadingSpinner').style.display =
                   'none';
+                $('#emailModal').modal('hide');
               });
             },
             error: function (response) {
+              console.error(response); // Debugging information
               var message = response.responseJSON
                 ? response.responseJSON.message
                 : 'Failed to send email. Please try again later.';
@@ -103,10 +153,12 @@
               }).then(function () {
                 document.getElementById('loadingSpinner').style.display =
                   'none';
+                $('#emailModal').modal('hide');
               });
             },
           });
         });
     </script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
