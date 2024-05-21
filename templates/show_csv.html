@@ -5,47 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Payment List</title>
     <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
     />
+    <link
+      rel="shortcut icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
       .container {
         margin-top: 20px;
       }
+      .month-header {
+        background-color: #343a40;
+        color: #fff;
+        padding: 10px;
+        border-radius: 5px;
+      }
     </style>
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class="navbar-brand" href="\">Tutoring Payment Tracker</a>
+    <nav class="navbar navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="\">
+          <img
+            src="/static/img.png"
+            alt=""
+            width="30"
+            height="25"
+            class="d-inline-block align-text-top"
+          />
+          Tutoring Payment Tracker
+        </a>
+      </div>
     </nav>
 
     <div class="container">
-      <h2 class="mb-4">Payment List</h2>
+      <h2 class="mb-4 text-center">Payment List</h2>
       {% for month, data in data_by_month.items() %}
-      <h3>{{ month_names[month] }}</h3>
-      <table class="table table-bordered">
-        <thead class="thead-dark">
-          <tr>
-            <th>Date</th>
-            <th>Amount</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for row in data %}
-          <tr>
-            <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <div class="mb-4">
+        <h3 class="month-header">{{ month_names[month] }}</h3>
+        <table class="table table-bordered table-hover mt-2">
+          <thead class="table-dark">
+            <tr>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data %}
+            <tr>
+              <td>{{ row[0] }}</td>
+              <td>{{ row[1] }}</td>
+              <td>{{ row[2] }}</td>
+              <td>{{ row[3] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
       {% endfor %}
-      <a href="/" class="btn btn-primary mt-3">Upload another file</a>
+      <div class="text-center">
+        <a href="/" class="btn btn-primary">Upload another file</a>
+      </div>
     </div>
   </body>
 </html>
