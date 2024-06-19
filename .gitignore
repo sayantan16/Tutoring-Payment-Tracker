@@ -81,4 +81,4 @@ payment_tracker.csv
 
 # Ignore uploads
 uploads/
-sendgrid.env
+sendgrid_Bkup.env
