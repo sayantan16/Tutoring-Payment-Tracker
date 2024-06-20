@@ -16,6 +16,7 @@ install_python_windows() {
         echo "Python3 is not installed. Installing Python3..."
         if ! command -v choco &> /dev/null; then
             echo "Chocolatey is not installed. Installing Chocolatey..."
+            command -v powershell &> /dev/null || { echo "PowerShell is not installed. Please install it manually."; exit 1; }
             powershell -NoProfile -ExecutionPolicy Bypass -Command \
             "Set-ExecutionPolicy AllSigned; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
             iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
@@ -26,7 +27,7 @@ install_python_windows() {
 }
 
 # Check if Python is installed and install if not present
-if ! command -v python3 &> /dev/null; then
+if ! command -v python3 &> /dev/null && ! command -v python &> /dev/null; then
     echo "Python3 is not installed. Installing Python3..."
     if [[ "$OSTYPE" == "darwin"* ]]; then
         install_python_mac
@@ -41,16 +42,20 @@ if ! command -v python3 &> /dev/null; then
     fi
 fi
 
+# Set Python and Pip commands
+PYTHON_CMD=$(command -v python3 || command -v python)
+PIP_CMD=$(command -v pip3 || command -v pip)
+
 # Install virtualenv if not installed
-if ! pip3 show virtualenv &> /dev/null; then
+if ! $PIP_CMD show virtualenv &> /dev/null; then
     echo "Installing virtualenv..."
-    pip3 install virtualenv
+    $PIP_CMD install virtualenv
 fi
 
 # Create a virtual environment
 if [ ! -d "venv" ]; then
     echo "Creating virtual environment..."
-    python3 -m venv venv
+    $PYTHON_CMD -m venv venv
 fi
 
 # Activate the virtual environment
@@ -83,4 +88,4 @@ fi
 
 # Run the Flask application
 echo "Running the Flask application on port 8888..."
-python app.py --port 8888
+$PYTHON_CMD app.py --port 8888
