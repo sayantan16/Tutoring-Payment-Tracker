@@ -16,13 +16,18 @@ install_python_windows() {
         echo "Python3 is not installed. Installing Python3..."
         if ! command -v choco &> /dev/null; then
             echo "Chocolatey is not installed. Installing Chocolatey..."
-            command -v powershell &> /dev/null || { echo "PowerShell is not installed. Please install it manually."; exit 1; }
-            powershell -NoProfile -ExecutionPolicy Bypass -Command \
+            if ! command -v pwsh &> /dev/null; then
+                echo "PowerShell is not installed. Installing PowerShell..."
+                curl -LO https://github.com/PowerShell/PowerShell/releases/download/v7.2.4/PowerShell-7.2.4-win-x64.msi
+                msiexec.exe /i PowerShell-7.2.4-win-x64.msi /quiet
+                rm PowerShell-7.2.4-win-x64.msi
+            fi
+            pwsh -NoProfile -ExecutionPolicy Bypass -Command \
             "Set-ExecutionPolicy AllSigned; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; \
             iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
         fi
         echo "Installing Python..."
-        powershell -NoProfile -ExecutionPolicy Bypass -Command "choco install python -y"
+        pwsh -NoProfile -ExecutionPolicy Bypass -Command "choco install python -y"
     fi
 }
 
