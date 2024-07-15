@@ -73,6 +73,6 @@ else
     exit 1
 fi
 
-# Run the Flask application
-echo "Running the Flask application on port 8888..."
-python app.py --port 8888
+# Run the Flask application with debug mode enabled
+echo "Running the Flask application on port 8888 with debug mode..."
+FLASK_ENV=development FLASK_APP=app.py flask run --port 8888 --debug

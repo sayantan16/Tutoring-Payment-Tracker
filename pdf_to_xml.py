@@ -1,4 +1,3 @@
-# pdf_to_xml.py
 import fitz  # PyMuPDF
 from pdf2image import convert_from_path
 import pytesseract
@@ -40,6 +39,11 @@ def pdf_to_xml(pdf_path, output_xml_path, log_path='log.txt'):
             if text.strip():
                 print("Text mode:")
                 print(text)
+
+                # Create a new element for each page in the XML
+                page_elem = ET.SubElement(root, "Page", number=str(page_num + 1))
+                for line in text.split("\n"):
+                    ET.SubElement(page_elem, "Line").text = line
             else:
                 print(f"Page {page_num + 1} does not contain text or is empty.")
         except Exception as e:
@@ -81,3 +85,6 @@ def pdf_to_xml(pdf_path, output_xml_path, log_path='log.txt'):
 
     print(f"XML file created: {output_xml_path}")
     print("Log file created: {log_path}")
+
+# Usage example:
+# pdf_to_xml('example.pdf', 'output.xml')

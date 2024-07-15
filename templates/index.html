@@ -152,8 +152,44 @@
           validateForm();
         });
 
-        $('#uploadForm').on('submit', function () {
+        $('#uploadForm').on('submit', function (e) {
+          e.preventDefault();
           $('#loadingSpinner').show();
+          const formData = new FormData(this);
+
+          $.ajax({
+            url: '/',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+              $('#loadingSpinner').hide();
+              if (data.message) {
+                let availableMonths = data.available_months
+                  ? data.available_months.join(', ')
+                  : '';
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: `${data.message} Available months: ${availableMonths}`,
+                });
+              } else {
+                window.location.href = data.redirect_url;
+              }
+            },
+            error: function (xhr, status, error) {
+              $('#loadingSpinner').hide();
+              let availableMonths = xhr.responseJSON.available_months
+                ? xhr.responseJSON.available_months.join(', ')
+                : '';
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: `${xhr.responseJSON.message} Available months: ${availableMonths}`,
+              });
+            },
+          });
         });
 
         validateForm(); // Initial validation check
